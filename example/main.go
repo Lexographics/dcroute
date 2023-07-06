@@ -9,7 +9,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-
 func main() {
 	godotenv.Load()
 	token := os.Getenv("BOT_TOKEN")
@@ -37,6 +36,18 @@ func main() {
 		if err != nil {
 			fmt.Printf("err: %v\n", err)
 		}
+		channel, err := ctx.Router().Session().Channel(ctx.ChannelID)
+		if err != nil {
+			return err
+		}
+
+		err = ctx.Router().CreateChannel(dcroute.CreateChannelArgs{
+			GuildID:    ctx.GuildID,
+			Name:       "test-channel",
+			Topic:      "Topic",
+			CategoryID: channel.ParentID,
+			Type:       dcroute.ChannelTypeGuildText,
+		})
 
 		return nil
 	})

@@ -36,7 +36,7 @@ func New(token string) *Router {
 
 func (r *Router) Group() *Group {
 	g := Group{
-		router:      r,
+		router:       r,
 		messageFuncs: map[string]HandlerFunc{},
 		errorFunc: func(ctx *Context) error {
 			return nil
@@ -87,6 +87,29 @@ func (r *Router) Wait() {
 	<-sc
 }
 
+func (r *Router) Session() *discordgo.Session {
+	return r.session
+}
+
+
+
+func (r *Router) CreateChannel(args CreateChannelArgs) error {
+	_, err := r.session.GuildChannelCreateComplex(args.GuildID, discordgo.GuildChannelCreateData{
+		Name:                 args.Name,
+		Type:                 discordgo.ChannelType(args.Type),
+		Topic:                args.Topic,
+		Bitrate:              0,
+		UserLimit:            0,
+		RateLimitPerUser:     0,
+		Position:             0,
+		PermissionOverwrites: []*discordgo.PermissionOverwrite{},
+		ParentID:             args.CategoryID,
+		NSFW:                 false,
+	})
+
+	return err
+}
+
 func (r *Router) processGroup(cmd string, group *Group, ctx *Context) {
 	handlerfn, ok := group.messageFuncs[cmd]
 	if !ok {
@@ -122,6 +145,7 @@ func (r *Router) handlerMessageCreate(s *discordgo.Session, m *discordgo.Message
 
 		MessageCreate: m,
 		session:       s,
+		router:        r,
 	}
 
 	if r.prefix != "" {

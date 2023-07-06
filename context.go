@@ -15,6 +15,7 @@ type Context struct {
 
 	MessageCreate *discordgo.MessageCreate
 
+	router  *Router
 	session *discordgo.Session
 }
 
@@ -42,4 +43,8 @@ func (c *Context) SendFile(channel string, name string, filepath string) error {
 
 	_, err = c.session.ChannelFileSend(channel, name, reader)
 	return err
+}
+
+func (c *Context) Router() *Router {
+	return c.router
 }
