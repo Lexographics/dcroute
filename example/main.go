@@ -6,6 +6,7 @@ import (
 	"os"
 
 	dcroute "github.com/Lexographics/dcroute/v1"
+	"github.com/Lexographics/dcroute/v1/utils"
 	"github.com/joho/godotenv"
 )
 
@@ -28,14 +29,7 @@ func main() {
 		return nil
 	})
 
-	userGroup.Message("ping", func(ctx *dcroute.Context) error {
-		fmt.Printf("Got message form %s with id %s\n", ctx.Sender.Username, ctx.Sender.ID)
-
-		ctx.SendReply(ctx.ChannelID, ctx.MessageID, ctx.GuildID, "pong")
-		err := ctx.SendFile(ctx.ChannelID, "image.jpg", "example/image.png")
-		if err != nil {
-			fmt.Printf("err: %v\n", err)
-		}
+	userGroup.Message("create-channel", func(ctx *dcroute.Context) error {
 		channel, err := ctx.Router().Session().Channel(ctx.ChannelID)
 		if err != nil {
 			return err
@@ -52,7 +46,29 @@ func main() {
 		return nil
 	})
 
+	userGroup.Message("ping", func(ctx *dcroute.Context) error {
+		return ctx.SendReply(ctx.ChannelID, ctx.MessageID, ctx.GuildID, "pong")
+	})
+
+	userGroup.Message("image", func(ctx *dcroute.Context) error {
+		fmt.Printf("Got message form %s with id %s\n", ctx.Sender.Username, ctx.Sender.ID)
+
+		err := ctx.SendFile(ctx.ChannelID, "image.jpg", "example/image.png")
+		if err != nil {
+			fmt.Printf("err: %v\n", err)
+		}
+		
+		return nil
+	})
+
+	userGroup.Message("emoji", func(ctx *dcroute.Context) error {
+		return ctx.SendReply(ctx.ChannelID, ctx.MessageID, ctx.GuildID, utils.GetEmoji("new_emoji", "1126605484644909106"))
+	})
+	
+
 	r.Start()
+	
+	// err := r.CreateEmoji("1095712396921806849", "new_emoji", "example/image.png")
 
 	r.Wait()
 }
