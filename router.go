@@ -64,8 +64,11 @@ U| |_| |\| |/__   |  _ <.-,_| |_| |  | |_| | /| |\   | |___
   |||_   _// \\   //   \\_    \\   (__) )(  _// \\_  <<   >>  
  (__)_) (__)(__) (__)  (__)  (__)      (__)(__) (__)(__) (__) 
 `
+	fmt.Print(cyan)
 	fmt.Println(text)
+	fmt.Print(green)
 	fmt.Printf("Discord bot '%s' started\n", h.session.State.User.Username)
+	fmt.Print(reset)
 
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
@@ -129,3 +132,13 @@ func (h *Router) handlerMessageCreate(s *discordgo.Session, m *discordgo.Message
 		h.processGroup(cmd, group, ctx)
 	}
 }
+
+
+const reset = "\033[0m"
+const red = "\033[31m"
+const green = "\033[32m"
+const yellow = "\033[33m"
+const blue = "\033[34m"
+const purple = "\033[35m"
+const cyan = "\033[36m"
+const white = "\033[37m"
