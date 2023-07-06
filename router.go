@@ -114,7 +114,9 @@ func (h *Router) handlerMessageCreate(s *discordgo.Session, m *discordgo.Message
 			Username: m.Author.Username,
 			ID:       m.Author.ID,
 		},
+		MessageID: m.ID,
 		ChannelID: m.ChannelID,
+		GuildID:   m.GuildID,
 
 		MessageCreate: m,
 		session:       s,
@@ -132,7 +134,6 @@ func (h *Router) handlerMessageCreate(s *discordgo.Session, m *discordgo.Message
 		h.processGroup(cmd, group, ctx)
 	}
 }
-
 
 const reset = "\033[0m"
 const red = "\033[31m"

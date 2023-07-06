@@ -32,7 +32,7 @@ func main() {
 	userGroup.Message("ping", func(ctx *dcroute.Context) error {
 		fmt.Printf("Got message form %s with id %s\n", ctx.Sender.Username, ctx.Sender.ID)
 
-		ctx.SendMessage(ctx.ChannelID, "pong")
+		ctx.SendReply(ctx.ChannelID, ctx.MessageID, ctx.GuildID, "pong")
 		err := ctx.SendFile(ctx.ChannelID, "image.jpg", "example/image.png")
 		if err != nil {
 			fmt.Printf("err: %v\n", err)

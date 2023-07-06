@@ -9,7 +9,9 @@ import (
 
 type Context struct {
 	Sender    *User
+	MessageID string
 	ChannelID string
+	GuildID   string
 
 	MessageCreate *discordgo.MessageCreate
 
@@ -18,6 +20,16 @@ type Context struct {
 
 func (c *Context) SendMessage(channel string, m string) error {
 	_, err := c.session.ChannelMessageSend(channel, m)
+	return err
+}
+
+func (c *Context) SendReply(channel string, messageID string, guildID string, m string) error {
+	_, err := c.session.ChannelMessageSendReply(channel, m, &discordgo.MessageReference{
+		MessageID: messageID,
+		ChannelID: channel,
+		GuildID:   guildID,
+	})
+
 	return err
 }
 
