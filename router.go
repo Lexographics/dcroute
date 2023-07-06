@@ -20,10 +20,20 @@ type Router struct {
 	prefix    string
 
 	groups []*Group
+	commands map[string]Command
 }
 
 func New(token string) *Router {
-	r := &Router{}
+	r := &Router{
+		errorFunc: func(ctx *Context) error {
+			return nil
+		},
+		session:  nil,
+		prefix:   "",
+		groups:   []*Group{},
+		commands: map[string]Command{},
+	}
+
 	session, err := discordgo.New("Bot " + token)
 	if err != nil {
 		log.Panicf("Failed to initialize discord bot: %s", err.Error())
@@ -58,6 +68,18 @@ func (r *Router) Start() error {
 	if err != nil {
 		return errors.New("Failed to initialize websocket connection: " + err.Error())
 	}
+
+	for name, command := range r.commands {
+		_, err := r.Session().ApplicationCommandCreate(r.Session().State.User.ID, command.GuildID, &discordgo.ApplicationCommand{
+			Name:                     name,
+			Description:              command.Description,
+		})
+		
+		if err != nil {
+			return err
+		}
+	}
+
 
 	text := `
   ____     ____    ____    U  ___ u   _   _  _____  U _____ u 

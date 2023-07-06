@@ -28,3 +28,8 @@ const (
 	ChannelTypeGuildStageVoice    ChannelType = 13
 	ChannelTypeGuildForum         ChannelType = 15
 )
+
+type Command struct {
+	Description string
+	GuildID     string
+}

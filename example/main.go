@@ -73,12 +73,15 @@ func main() {
 		return nil
 	})
 	
-	r.Start()
-
-	userGroup.Command("test", "Description", "1095712396921806849", func(ctx *dcroute.Context) error {
+	userGroup.Command("test", dcroute.Command{
+		Description: "Description",
+		GuildID:     "1095712396921806849",
+	}, func(ctx *dcroute.Context) error {
 		ctx.CommandRespond("test2")
 		return nil
 	})
+	
+	r.Start()
 	
 	// err := r.CreateEmoji("1095712396921806849", "new_emoji", "example/image.png")
 
