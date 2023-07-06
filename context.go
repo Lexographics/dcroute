@@ -19,29 +19,37 @@ type Context struct {
 	session *discordgo.Session
 }
 
-func (c *Context) SendMessage(channel string, m string) error {
-	_, err := c.session.ChannelMessageSend(channel, m)
+func (c *Context) SendMessage(channelID string, m string) error {
+	_, err := c.session.ChannelMessageSend(channelID, m)
 	return err
 }
 
-func (c *Context) SendReply(channel string, messageID string, guildID string, m string) error {
-	_, err := c.session.ChannelMessageSendReply(channel, m, &discordgo.MessageReference{
+func (c *Context) SendReply(channelID string, messageID string, guildID string, m string) error {
+	_, err := c.session.ChannelMessageSendReply(channelID, m, &discordgo.MessageReference{
 		MessageID: messageID,
-		ChannelID: channel,
+		ChannelID: channelID,
 		GuildID:   guildID,
 	})
 
 	return err
 }
 
-func (c *Context) SendFile(channel string, name string, filepath string) error {
+func (c *Context) SendReaction(channelID string, messageID string, reaction string) error {
+	return c.session.MessageReactionAdd(channelID, messageID, reaction)
+}
+
+func (c *Context) RemoveReaction(channelID string, messageID string, reaction string) error {
+	return c.session.MessageReactionRemove(channelID, messageID, reaction, c.Router().Session().State.User.ID)
+}
+
+func (c *Context) SendFile(channelID string, name string, filepath string) error {
 	file, err := os.Open(filepath)
 	if err != nil {
 		return err
 	}
 	reader := bufio.NewReader(file)
 
-	_, err = c.session.ChannelFileSend(channel, name, reader)
+	_, err = c.session.ChannelFileSend(channelID, name, reader)
 	return err
 }
 

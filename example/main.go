@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"time"
 
 	dcroute "github.com/Lexographics/dcroute/v1"
 	"github.com/Lexographics/dcroute/v1/utils"
@@ -63,6 +64,13 @@ func main() {
 
 	userGroup.Message("emoji", func(ctx *dcroute.Context) error {
 		return ctx.SendReply(ctx.ChannelID, ctx.MessageID, ctx.GuildID, utils.GetEmoji("new_emoji", "1126605484644909106"))
+	})
+
+	userGroup.Message("react", func(ctx *dcroute.Context) error {
+		ctx.SendReaction(ctx.ChannelID, ctx.MessageID, utils.GetReaction("new_emoji", "1126605484644909106"))
+		time.Sleep(time.Second * 2)
+		ctx.RemoveReaction(ctx.ChannelID, ctx.MessageID, utils.GetReaction("new_emoji", "1126605484644909106"))
+		return nil
 	})
 	
 
