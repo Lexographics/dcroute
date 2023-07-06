@@ -1,8 +1,10 @@
 package dcroute
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/signal"
@@ -105,6 +107,35 @@ func (r *Router) CreateChannel(args CreateChannelArgs) error {
 		PermissionOverwrites: []*discordgo.PermissionOverwrite{},
 		ParentID:             args.CategoryID,
 		NSFW:                 false,
+	})
+
+	return err
+}
+
+func (r *Router) CreateEmoji(guildID string, name string, path string) error {
+	file, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+
+	bytes, err := ioutil.ReadAll(file)
+	if err != nil {
+		return err
+	}
+
+	b64 := base64.StdEncoding.EncodeToString(bytes)
+	if strings.HasSuffix(file.Name(), ".png") {
+		b64 = "data:image/png;base64," + b64
+	} else if strings.HasSuffix(file.Name(), ".jpg") {
+		b64 = "data:image/jpg;base64," + b64
+	} else {
+		return errors.New("Invalid file extension")
+	}
+
+	_, err = r.Session().GuildEmojiCreate(guildID, &discordgo.EmojiParams{
+		Name:  name,
+		Image: b64,
+		Roles: []string{},
 	})
 
 	return err
