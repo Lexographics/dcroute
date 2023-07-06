@@ -70,10 +70,6 @@ U| |_| |\| |/__   |  _ <.-,_| |_| |  | |_| | /| |\   | |___
 	fmt.Printf("Discord bot '%s' started\n", h.session.State.User.Username)
 	fmt.Print(reset)
 
-	sc := make(chan os.Signal, 1)
-	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
-	<-sc
-
 	return nil
 }
 
@@ -83,6 +79,12 @@ func (h *Router) SetErrorFunc(f HandlerFunc) {
 
 func (h *Router) SetPrefix(prefix string) {
 	h.prefix = prefix
+}
+
+func (h *Router) Wait() {
+	sc := make(chan os.Signal, 1)
+	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
+	<-sc
 }
 
 func (h *Router) processGroup(cmd string, group *Group, ctx *Context) {

@@ -42,4 +42,6 @@ func main() {
 	})
 
 	h.Start()
+
+	h.Wait()
 }
