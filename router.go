@@ -21,22 +21,22 @@ type Router struct {
 }
 
 func New(token string) *Router {
-	h := &Router{}
+	r := &Router{}
 	session, err := discordgo.New("Bot " + token)
 	if err != nil {
 		log.Panicf("Failed to initialize discord bot: %s", err.Error())
 	}
 
-	h.session = session
-	session.AddHandler(h.handlerMessageCreate)
+	r.session = session
+	session.AddHandler(r.handlerMessageCreate)
 	session.Identify.Intents = discordgo.IntentGuildMessages
 
-	return h
+	return r
 }
 
-func (h *Router) Group() *Group {
+func (r *Router) Group() *Group {
 	g := Group{
-		handler:      h,
+		router:      r,
 		messageFuncs: map[string]HandlerFunc{},
 		errorFunc: func(ctx *Context) error {
 			return nil
@@ -44,12 +44,12 @@ func (h *Router) Group() *Group {
 		middlewares: []MiddlewareFunc{},
 	}
 
-	h.groups = append(h.groups, &g)
+	r.groups = append(r.groups, &g)
 	return &g
 }
 
-func (h *Router) Start() error {
-	err := h.session.Open()
+func (r *Router) Start() error {
+	err := r.session.Open()
 
 	if err != nil {
 		return errors.New("Failed to initialize websocket connection: " + err.Error())
@@ -67,27 +67,27 @@ U| |_| |\| |/__   |  _ <.-,_| |_| |  | |_| | /| |\   | |___
 	fmt.Print(cyan)
 	fmt.Println(text)
 	fmt.Print(green)
-	fmt.Printf("Discord bot '%s' started\n", h.session.State.User.Username)
+	fmt.Printf("Discord bot '%s' started\n", r.session.State.User.Username)
 	fmt.Print(reset)
 
 	return nil
 }
 
-func (h *Router) SetErrorFunc(f HandlerFunc) {
-	h.errorFunc = f
+func (r *Router) SetErrorFunc(f HandlerFunc) {
+	r.errorFunc = f
 }
 
-func (h *Router) SetPrefix(prefix string) {
-	h.prefix = prefix
+func (r *Router) SetPrefix(prefix string) {
+	r.prefix = prefix
 }
 
-func (h *Router) Wait() {
+func (r *Router) Wait() {
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	<-sc
 }
 
-func (h *Router) processGroup(cmd string, group *Group, ctx *Context) {
+func (r *Router) processGroup(cmd string, group *Group, ctx *Context) {
 	handlerfn, ok := group.messageFuncs[cmd]
 	if !ok {
 		return
@@ -106,7 +106,7 @@ func (h *Router) processGroup(cmd string, group *Group, ctx *Context) {
 	}
 }
 
-func (h *Router) handlerMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
+func (r *Router) handlerMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
@@ -124,16 +124,16 @@ func (h *Router) handlerMessageCreate(s *discordgo.Session, m *discordgo.Message
 		session:       s,
 	}
 
-	if h.prefix != "" {
-		if !strings.HasPrefix(m.Content, h.prefix) {
+	if r.prefix != "" {
+		if !strings.HasPrefix(m.Content, r.prefix) {
 			return
 		}
 	}
 
-	cmd := strings.TrimPrefix(m.Content, h.prefix)
+	cmd := strings.TrimPrefix(m.Content, r.prefix)
 
-	for _, group := range h.groups {
-		h.processGroup(cmd, group, ctx)
+	for _, group := range r.groups {
+		r.processGroup(cmd, group, ctx)
 	}
 }
 

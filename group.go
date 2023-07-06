@@ -1,7 +1,7 @@
 package dcroute
 
 type Group struct {
-	handler *Router
+	router *Router
 
 	messageFuncs map[string]HandlerFunc
 

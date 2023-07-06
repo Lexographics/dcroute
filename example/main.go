@@ -17,9 +17,9 @@ func main() {
 		panic("Invalid token, see '.env.example'")
 	}
 
-	h := dcroute.New(token)
+	r := dcroute.New(token)
 
-	userGroup := h.Group()
+	userGroup := r.Group()
 
 	userGroup.Use(func(ctx *dcroute.Context) error {
 		if ctx.ChannelID == "11111111111111111111" {
@@ -41,7 +41,7 @@ func main() {
 		return nil
 	})
 
-	h.Start()
+	r.Start()
 
-	h.Wait()
+	r.Wait()
 }
