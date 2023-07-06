@@ -13,7 +13,8 @@ type Context struct {
 	ChannelID string
 	GuildID   string
 
-	MessageCreate *discordgo.MessageCreate
+	MessageCreate     *discordgo.MessageCreate
+	InteractionCreate *discordgo.InteractionCreate
 
 	router  *Router
 	session *discordgo.Session
@@ -40,6 +41,15 @@ func (c *Context) SendReaction(channelID string, messageID string, reaction stri
 
 func (c *Context) RemoveReaction(channelID string, messageID string, reaction string) error {
 	return c.session.MessageReactionRemove(channelID, messageID, reaction, c.Router().Session().State.User.ID)
+}
+
+func (c *Context) CommandRespond(response string) {
+	c.session.InteractionRespond(c.InteractionCreate.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Content: response,
+		},
+	})
 }
 
 func (c *Context) SendFile(channelID string, name string, filepath string) error {

@@ -31,6 +31,7 @@ func New(token string) *Router {
 
 	r.session = session
 	session.AddHandler(r.handlerMessageCreate)
+	session.AddHandler(r.handlerInteractionCreate)
 	session.Identify.Intents = discordgo.IntentGuildMessages
 
 	return r
@@ -40,6 +41,7 @@ func (r *Router) Group() *Group {
 	g := Group{
 		router:       r,
 		messageFuncs: map[string]HandlerFunc{},
+		commandFuncs: map[string]HandlerFunc{},
 		errorFunc: func(ctx *Context) error {
 			return nil
 		},
@@ -93,8 +95,6 @@ func (r *Router) Session() *discordgo.Session {
 	return r.session
 }
 
-
-
 func (r *Router) CreateChannel(args CreateChannelArgs) error {
 	_, err := r.session.GuildChannelCreateComplex(args.GuildID, discordgo.GuildChannelCreateData{
 		Name:                 args.Name,
@@ -141,7 +141,7 @@ func (r *Router) CreateEmoji(guildID string, name string, path string) error {
 	return err
 }
 
-func (r *Router) processGroup(cmd string, group *Group, ctx *Context) {
+func (r *Router) processMessageCreate(cmd string, group *Group, ctx *Context) {
 	handlerfn, ok := group.messageFuncs[cmd]
 	if !ok {
 		return
@@ -160,6 +160,12 @@ func (r *Router) processGroup(cmd string, group *Group, ctx *Context) {
 	}
 }
 
+func (r *Router) processInteractionCreate(cmd string, group *Group, ctx *Context) {
+	if h, ok := group.commandFuncs[cmd]; ok {
+		h(ctx)
+	}
+}
+
 func (r *Router) handlerMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.ID == s.State.User.ID {
 		return
@@ -174,9 +180,10 @@ func (r *Router) handlerMessageCreate(s *discordgo.Session, m *discordgo.Message
 		ChannelID: m.ChannelID,
 		GuildID:   m.GuildID,
 
-		MessageCreate: m,
-		session:       s,
-		router:        r,
+		MessageCreate:     m,
+		InteractionCreate: nil,
+		session:           s,
+		router:            r,
 	}
 
 	if r.prefix != "" {
@@ -188,7 +195,30 @@ func (r *Router) handlerMessageCreate(s *discordgo.Session, m *discordgo.Message
 	cmd := strings.TrimPrefix(m.Content, r.prefix)
 
 	for _, group := range r.groups {
-		r.processGroup(cmd, group, ctx)
+		r.processMessageCreate(cmd, group, ctx)
+	}
+}
+
+func (r *Router) handlerInteractionCreate(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	cmd := i.ApplicationCommandData().Name
+
+	ctx := &Context{
+		Sender: &User{
+			Username: i.Member.User.Username,
+			ID:       i.Member.User.ID,
+		},
+		MessageID: i.ID,
+		ChannelID: i.ChannelID,
+		GuildID:   i.GuildID,
+
+		MessageCreate:     nil,
+		InteractionCreate: i,
+		session:           s,
+		router:            r,
+	}
+
+	for _, group := range r.groups {
+		r.processInteractionCreate(cmd, group, ctx)
 	}
 }
 
