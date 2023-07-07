@@ -19,7 +19,7 @@ type Router struct {
 	session   *discordgo.Session
 	prefix    string
 
-	groups []*Group
+	groups   []*Group
 	commands map[string]Command
 }
 
@@ -71,15 +71,14 @@ func (r *Router) Start() error {
 
 	for name, command := range r.commands {
 		_, err := r.Session().ApplicationCommandCreate(r.Session().State.User.ID, command.GuildID, &discordgo.ApplicationCommand{
-			Name:                     name,
-			Description:              command.Description,
+			Name:        name,
+			Description: command.Description,
 		})
-		
+
 		if err != nil {
 			return err
 		}
 	}
-
 
 	text := `
   ____     ____    ____    U  ___ u   _   _  _____  U _____ u 
@@ -164,10 +163,6 @@ func (r *Router) CreateEmoji(guildID string, name string, path string) (*discord
 }
 
 func (r *Router) processMessageCreate(cmd string, group *Group, ctx *Context) {
-	handlerfn, ok := group.messageFuncs[cmd]
-	if !ok {
-		return
-	}
 
 	for _, fn := range group.middlewares {
 		err := fn(ctx)
@@ -176,10 +171,36 @@ func (r *Router) processMessageCreate(cmd string, group *Group, ctx *Context) {
 		}
 	}
 
-	err := handlerfn(ctx)
-	if err != nil {
-		fmt.Println("Handler error: " + err.Error())
+	called := false
+
+	anyFn, ok := group.messageFuncs[MessageAny]
+	if ok {
+		err := anyFn(ctx)
+		if err != nil {
+			fmt.Println("_any handler error: " + err.Error())
+		}
 	}
+
+	handlerfn, ok := group.messageFuncs[cmd]
+	if ok {
+		err := handlerfn(ctx)
+		called = true
+		if err != nil {
+			fmt.Println("Handler error: " + err.Error())
+		}
+	}
+
+	if !called {
+		notFoundfn, ok := group.messageFuncs[MessageNotFound]
+		if ok {
+			err := notFoundfn(ctx)
+			called = true
+			if err != nil {
+				fmt.Println("_notfounc handler error: " + err.Error())
+			}
+		}
+	}
+
 }
 
 func (r *Router) processInteractionCreate(cmd string, group *Group, ctx *Context) {

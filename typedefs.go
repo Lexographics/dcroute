@@ -33,3 +33,6 @@ type Command struct {
 	Description string
 	GuildID     string
 }
+
+const MessageAny = "_*"
+const MessageNotFound = "_?"

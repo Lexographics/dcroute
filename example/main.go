@@ -72,6 +72,14 @@ func main() {
 		ctx.RemoveReaction(ctx.ChannelID, ctx.MessageID, utils.GetReaction("new_emoji", "1126605484644909106"))
 		return nil
 	})
+
+	userGroup.Message(dcroute.MessageAny, func(ctx *dcroute.Context) error {
+		return ctx.SendMessage(ctx.ChannelID, "This will run on every message")
+	})
+
+	userGroup.Message(dcroute.MessageNotFound, func(ctx *dcroute.Context) error {
+		return ctx.SendMessage(ctx.ChannelID, "This will run when message was not a command")
+	})
 	
 	userGroup.Command("test", dcroute.Command{
 		Description: "Description",
