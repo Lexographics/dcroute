@@ -117,8 +117,8 @@ func (r *Router) Session() *discordgo.Session {
 	return r.session
 }
 
-func (r *Router) CreateChannel(args CreateChannelArgs) error {
-	_, err := r.session.GuildChannelCreateComplex(args.GuildID, discordgo.GuildChannelCreateData{
+func (r *Router) CreateChannel(args CreateChannelArgs) (*discordgo.Channel, error) {
+	channel, err := r.session.GuildChannelCreateComplex(args.GuildID, discordgo.GuildChannelCreateData{
 		Name:                 args.Name,
 		Type:                 discordgo.ChannelType(args.Type),
 		Topic:                args.Topic,
@@ -131,18 +131,18 @@ func (r *Router) CreateChannel(args CreateChannelArgs) error {
 		NSFW:                 false,
 	})
 
-	return err
+	return channel, err
 }
 
-func (r *Router) CreateEmoji(guildID string, name string, path string) error {
+func (r *Router) CreateEmoji(guildID string, name string, path string) (*discordgo.Emoji, error) {
 	file, err := os.Open(path)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	bytes, err := ioutil.ReadAll(file)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	b64 := base64.StdEncoding.EncodeToString(bytes)
@@ -151,16 +151,16 @@ func (r *Router) CreateEmoji(guildID string, name string, path string) error {
 	} else if strings.HasSuffix(file.Name(), ".jpg") {
 		b64 = "data:image/jpg;base64," + b64
 	} else {
-		return errors.New("Invalid file extension")
+		return nil, errors.New("Invalid file extension")
 	}
 
-	_, err = r.Session().GuildEmojiCreate(guildID, &discordgo.EmojiParams{
+	emoji, err := r.Session().GuildEmojiCreate(guildID, &discordgo.EmojiParams{
 		Name:  name,
 		Image: b64,
 		Roles: []string{},
 	})
 
-	return err
+	return emoji, err
 }
 
 func (r *Router) processMessageCreate(cmd string, group *Group, ctx *Context) {

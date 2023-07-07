@@ -36,7 +36,7 @@ func main() {
 			return err
 		}
 
-		err = ctx.Router().CreateChannel(dcroute.CreateChannelArgs{
+		_, err = ctx.Router().CreateChannel(dcroute.CreateChannelArgs{
 			GuildID:    ctx.GuildID,
 			Name:       "test-channel",
 			Topic:      "Topic",
@@ -83,7 +83,7 @@ func main() {
 	
 	r.Start()
 	
-	// err := r.CreateEmoji("1095712396921806849", "new_emoji", "example/image.png")
+	// _, err := r.CreateEmoji("1095712396921806849", "new_emoji", "example/image.png")
 
 	r.Wait()
 }
