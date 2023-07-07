@@ -1,4 +1,4 @@
-module github.com/Lexographics/dcroute/v1
+module github.com/Lexographics/dcroute
 
 go 1.20
 

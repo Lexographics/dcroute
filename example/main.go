@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
-	dcroute "github.com/Lexographics/dcroute/v1"
-	"github.com/Lexographics/dcroute/v1/utils"
+	dcroute "github.com/Lexographics/dcroute"
+	"github.com/Lexographics/dcroute/utils"
 	"github.com/joho/godotenv"
 )
 
